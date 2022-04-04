@@ -59,6 +59,17 @@ version = ">=3.6.0"
 
 [[package]]
 category = "main"
+description = "WSGI HTTP Server for UNIX"
+name = "gunicorn"
+optional = false
+python-versions = ">=3.5"
+version = "20.1.0"
+
+[package.dependencies]
+setuptools = ">=3.0"
+
+[[package]]
+category = "main"
 description = "Internationalized Domain Names in Applications (IDNA)"
 marker = "python_version >= \"3\""
 name = "idna"
@@ -164,7 +175,7 @@ python-versions = ">=3.7"
 version = "3.8.0"
 
 [metadata]
-content-hash = "a5437f7dc03cf0fbeb5e34ccbf6e7dfb6d87d5d1f50f890a7da3a97e64b50c31"
+content-hash = "dc0c3a82afbba250a3a36e7b02a9c00de6f9457abaceda1b42db6f98b3e6cf5b"
 python-versions = "^3.7"
 
 [metadata.hashes]
@@ -173,6 +184,7 @@ charset-normalizer = ["2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c739
 click = ["24e1a4a9ec5bf6299411369b208c1df2188d9eb8d916302fe6bf03faed227f1e", "479707fe14d9ec9a0757618b7a100a0ae4c4e236fac5b7f80ca68028141a1a72"]
 colorama = ["5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b", "9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"]
 flask = ["8a4cf32d904cf5621db9f0c9fbcd7efabf3003f22a04e4d0ce790c7137ec5264", "a8c9bd3e558ec99646d177a9739c41df1ded0629480b4c8d2975412f3c9519c8"]
+gunicorn = ["9dcc4547dbb1cb284accfb15ab5667a0e5d1881cc443e0677b4882a4067a807e", "e0a968b5ba15f8a328fdfd7ab1fcb5af4470c28aaf7e55df02a99bc13138e6e8"]
 idna = ["84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff", "9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"]
 importlib-metadata = ["1208431ca90a8cca1a6b8af391bb53c1a2db74e5d1cef6ddced95d4b2062edc6", "ea4c597ebf37142f827b8f39299579e31685c31d3a438b59f469406afd0f2539"]
 itsdangerous = ["2c2349112351b88699d8d4b6b075022c0808887cb7ad10069318a8b0bc88db44", "5dbbc68b317e5e42f327f9021763545dc3fc3bfe22e6deb96aaf1fc38874156a"]

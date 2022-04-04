@@ -8,6 +8,7 @@ authors = ["Andreas Bergem <bergem.andreas@gmail.com>"]
 python = "^3.7"
 flask = "^2.1"
 requests = "^2.27"
+gunicorn = "^20.1"
 
 [tool.poetry.dev-dependencies]
 
