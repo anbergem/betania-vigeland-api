@@ -1,10 +1,11 @@
 import collections
 import json
+import logging
 
 import flask
 import requests.auth
 
-bp = flask.Blueprint('planning-center', __name__, url_prefix="/planning-center")
+from .blueprint import bp
 
 
 @bp.route("/get-confirmed-team-members", methods=["GET"])
@@ -14,6 +15,7 @@ def get_confirmed_team_members():
     auth = flask.request.authorization
 
     if auth is None:
+        logging.info("Unauthorized access requested")
         return "Bad request: Authorization required", 400
 
     response = requests.get(url + "/team_members?per_page=100&include=team", auth=requests.auth.HTTPBasicAuth(auth.username, auth.password))
