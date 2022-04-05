@@ -2,7 +2,7 @@ import logging
 
 from flask import Flask
 
-from .planning_center import bp as planning_center_bp
+from .public.planning_center import bp as planning_center_bp
 
 
 def create_app():
