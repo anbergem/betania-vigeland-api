@@ -1,18 +1,39 @@
 import collections
+import typing
 
 import requests.auth
 
 
-def get_people(auth, *includes):
+from ...src.planning_center.model import Person
+
+
+def get_people(auth, *, includes=None, where=None) -> typing.Sequence[Person]:
+    if isinstance(includes, str):
+        includes = [includes]
+
     url = f"https://api.planningcenteronline.com/people/v2/people"
     prepared_request = requests.PreparedRequest()
-    prepared_request.prepare(url=url, params={
+    params = {
         "per_page": 100,
-        "include": ",".join(includes)
-    })
+        "include": ",".join(includes),
+    }
+    if where is not None:
+        params[f"where[{where[0]}]"] = where[1]
+    prepared_request.prepare(url=url, params=params)
     print(prepared_request.url)
     response = requests.get(prepared_request.url, auth=requests.auth.HTTPBasicAuth(auth.username, auth.password))
-    return response.json()
+    persons = []
+    json_response = response.json()
+    for data in json_response["data"]:
+        kwargs = {}
+        if includes is not None:
+            for inclusion in json_response["included"]:
+                if inclusion["type"] == "PhoneNumber" and inclusion["relationships"]["person"]["data"]["id"] == data["id"]:
+                    phone_number = inclusion["attributes"]["number"].encode("ascii", "ignore").decode("utf-8")
+                    phone_number = phone_number.replace(" ", "").replace("+47", "")
+                    kwargs["phone_number"] = phone_number
+        persons.append(Person(data, **kwargs))
+    return persons
 
 
 def get_team_members(plan_id: int, auth):
@@ -28,24 +49,17 @@ def get_team_members(plan_id: int, auth):
         elif inclusion["type"] == "Person":
             person_map[inclusion["id"]]["name"] = inclusion["attributes"]["name"]
 
-    people_data = get_people(auth, "phone_numbers")
+    persons = get_people(auth, includes="phone_numbers")
 
-    for person in people_data["data"]:
-        for inclusion in people_data["included"]:
-            print(person["id"])
-            print(inclusion["relationships"]["person"]["data"]["id"])
-            print()
-            if inclusion["relationships"]["person"]["data"]["id"] == person["id"]:
-                # Weird hack to remove unicode characters like \u202d around the string
-                phone_number = inclusion["attributes"]["number"].encode("ascii", "ignore").decode("utf-8")
-                phone_number = phone_number.replace(" ", "").replace("+47", "")
-                person_map[person["id"]]["phone_number"] = phone_number
+    for person in persons:
+        person_map[person.id]["phone_number"] = person.phone_number
 
     for person in data["data"]:
         team = person["relationships"]["team"]["data"]["id"]
         if team not in team_map:
             raise RuntimeError(f"Team not in included teams: {team}")
         person_id = person["relationships"]["person"]["data"]["id"]
-        team_members[team_map[team]][person["attributes"]["team_position_name"]].add((person["attributes"]["name"], person_map[person_id]["phone_number"] if "phone_number" in person_map[person_id] else None))
+        team_members[team_map[team]][person["attributes"]["team_position_name"]].add(
+            (person["attributes"]["name"], person_map[person_id]["phone_number"] if "phone_number" in person_map[person_id] else None))
 
     return team_members
