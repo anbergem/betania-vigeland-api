@@ -7,11 +7,8 @@ import requests.auth
 
 from config import USERNAME, PASSWORD
 from .blueprint import bp
+from ...src.google_sheets.service import get_technicians_for_date
 from ...src.planning_center.team import get_people
-
-
-def get_technician_name_for_date(date: datetime.date) -> str:
-    return "Andreas Bergem"
 
 
 def create_plan_person(team_id: int, team_position_name: str, person_id: int, auth):
@@ -23,33 +20,37 @@ def create_plan_person(team_id: int, team_position_name: str, person_id: int, au
         logging.debug(json.dumps(response.json()))
 
 
-def set_technician_for_date(auth: requests.auth.HTTPBasicAuth, date: datetime.date):
-    technician_name = get_technician_name_for_date(date)
-    technicians = get_people(auth, where=("search_name", technician_name))  # 71247615
-    if len(technicians) != 1:
-        logging.warning(f"Expected to find 1 technician, found {len(technicians)}")
-        if len(technicians) > 1:
-            logging.warning(f"\t{','.join([technician.name for technician in technicians])}")
-        return
-    team_id = 1372212
-    create_plan_person(team_id, "PC", technicians[0].id, auth)
+def set_technicians_for_date(auth: requests.auth.HTTPBasicAuth, date: datetime.date):
+    technician_names = get_technicians_for_date(date)
+    # Todo: Move somewhere
+    technicians_team_id = 1372212
+    for position, name in technician_names.items():
+        technicians = get_people(auth, where=("search_name", name))
+        if len(technicians) != 1:
+            logging.warning(f"Expected to find 1 technician, found {len(technicians)}")
+            if len(technicians) > 1:
+                logging.warning(f"\t{','.join([technician.name for technician in technicians])}")
+            return
+
+        create_plan_person(technicians_team_id, position, technicians[0].id, auth)
 
 
 @bp.route("/plan-created", methods=["POST"])
 def plan_created():
-    if flask.request.is_json:
+    if not flask.request.is_json:
         logging.warning("Plan created post request not in json format")
         return json.dumps({"success": False})
 
-    data = flask.request.json
+    data = flask.request.json["data"][0]["attributes"]
     payload = json.loads(data["payload"])
 
     service_type_id = payload["data"]["relationships"]["service_type"]["data"]["id"]
 
-    # Møte Betania Vigeland
-    if service_type_id == 368342:
+    meeting_service_id = 368342  # Møte Betania Vigeland
+
+    if service_type_id == meeting_service_id:
         date = datetime.datetime.strptime(payload["data"]["attributes"]["dates"], "%d %B %Y").date()
         auth = requests.auth.HTTPBasicAuth(USERNAME, PASSWORD)
-        set_technician_for_date(auth, date)
+        set_technicians_for_date(auth, date)
 
     return json.dumps({"success": True})

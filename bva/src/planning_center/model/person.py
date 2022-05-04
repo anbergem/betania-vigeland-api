@@ -1,3 +1,6 @@
+import typing
+
+
 class Person:
     def __init__(self, data, **kwargs):
         self._data = data
