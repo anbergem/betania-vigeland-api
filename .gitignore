@@ -1,6 +1,10 @@
 /.idea/
 
 # Configuration file
-config.py
+/config.py
+
+# Google authentication
+/credentials.json
+/token.json
 
 __pycache__/
