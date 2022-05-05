@@ -15,8 +15,9 @@ def get_people(auth, *, includes=None, where=None) -> typing.Sequence[Person]:
     prepared_request = requests.PreparedRequest()
     params = {
         "per_page": 100,
-        "include": ",".join(includes),
     }
+    if includes is not None:
+        params["include"] = ",".join(includes)
     if where is not None:
         params[f"where[{where[0]}]"] = where[1]
     prepared_request.prepare(url=url, params=params)
