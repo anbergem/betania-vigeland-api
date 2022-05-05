@@ -1,4 +1,7 @@
 import bva
+import dotenv
+
+dotenv.load_dotenv()
 
 app = bva.create_app()
 

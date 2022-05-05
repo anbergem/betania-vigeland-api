@@ -8,3 +8,6 @@
 /token.json
 
 __pycache__/
+
+# Environment variable file
+.env*
