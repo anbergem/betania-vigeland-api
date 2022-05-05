@@ -14,14 +14,14 @@ log = logging.getLogger("bva")
 
 
 def create_plan_person(service_type_id, plan_id, team_id: int, team_position_name: str, person_id: int, auth):
-    url = f"https://api.planningcenteronline.com/services/v2/service_types/{service_type_id}/plans/{plan_id}/schedule_team_members"
+    url = f"https://api.planningcenteronline.com/services/v2/service_types/{service_type_id}/plans/{plan_id}/team_members"
     data = {
         "data": {
             "attributes": {
                 "team_id": team_id,
                 "team_position_name": team_position_name,
-                "people_ids": [person_id],
-                "status": "C"
+                "person_id": person_id,
+                "status": "Confirmed"
             }
         }
     }
