@@ -5,6 +5,8 @@ from googleapiclient.errors import HttpError
 
 from .auth import authenticate
 
+log = logging.getLogger("bva")
+
 
 def read_spreadsheet(spreadsheet_id: str, range):
     creds = authenticate()
@@ -17,8 +19,8 @@ def read_spreadsheet(spreadsheet_id: str, range):
         values = result.get('values', [])
 
         if not values:
-            logging.warning(f"No data found in spreadsheet {spreadsheet_id}, range {range}")
+            log.warning(f"No data found in spreadsheet {spreadsheet_id}, range {range}")
 
         return values
     except HttpError as err:
-        logging.error(err)
+        log.error(err)

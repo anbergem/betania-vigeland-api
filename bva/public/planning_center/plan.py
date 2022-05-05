@@ -10,14 +10,15 @@ from .blueprint import bp
 from ...src.google_sheets.service import get_technicians_for_date
 from ...src.planning_center.team import get_people
 
+log = logging.getLogger("bva")
 
 def create_plan_person(team_id: int, team_position_name: str, person_id: int, auth):
     url = f"https://api.planningcenteronline.com/services/v2/service_types/368342/plans/58318974/schedule_team_members"
     data = {"data": {"attributes": {"team_id": team_id, "team_position_name": team_position_name, "people_ids": [person_id]}}}
     response = requests.post(url, json=data, auth=auth)
     if response.status_code != 201:
-        logging.warning(f"Could not create plan person: {response.reason}")
-        logging.debug(json.dumps(response.json()))
+        log.warning(f"Could not create plan person: {response.reason}")
+        log.debug(json.dumps(response.json()))
 
 
 def set_technicians_for_date(auth: requests.auth.HTTPBasicAuth, date: datetime.date):
@@ -27,9 +28,9 @@ def set_technicians_for_date(auth: requests.auth.HTTPBasicAuth, date: datetime.d
     for position, name in technician_names.items():
         technicians = get_people(auth, where=("search_name", name))
         if len(technicians) != 1:
-            logging.warning(f"Expected to find 1 technician, found {len(technicians)}")
+            log.warning(f"Expected to find 1 technician, found {len(technicians)}")
             if len(technicians) > 1:
-                logging.warning(f"\t{','.join([technician.name for technician in technicians])}")
+                log.warning(f"\t{','.join([technician.name for technician in technicians])}")
             return
 
         create_plan_person(technicians_team_id, position, technicians[0].id, auth)
@@ -38,7 +39,7 @@ def set_technicians_for_date(auth: requests.auth.HTTPBasicAuth, date: datetime.d
 @bp.route("/plan-created", methods=["POST"])
 def plan_created():
     if not flask.request.is_json:
-        logging.warning("Plan created post request not in json format")
+        log.warning("Plan created post request not in json format")
         return json.dumps({"success": False})
 
     data = flask.request.json["data"][0]["attributes"]
