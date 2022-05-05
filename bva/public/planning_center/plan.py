@@ -1,11 +1,11 @@
 import datetime
 import json
 import logging
+import os
 
 import flask
 import requests.auth
 
-from config import USERNAME, PASSWORD
 from .blueprint import bp
 from ...src.google_sheets.service import get_technicians_for_date
 from ...src.planning_center.team import get_people
@@ -50,7 +50,7 @@ def plan_created():
 
     if service_type_id == meeting_service_id:
         date = datetime.datetime.strptime(payload["data"]["attributes"]["dates"], "%d %B %Y").date()
-        auth = requests.auth.HTTPBasicAuth(USERNAME, PASSWORD)
+        auth = requests.auth.HTTPBasicAuth(os.getenv("USERNAME"), os.getenv("PASSWORD"))
         set_technicians_for_date(auth, date)
 
     return json.dumps({"success": True})
