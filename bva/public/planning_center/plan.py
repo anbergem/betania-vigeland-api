@@ -27,6 +27,8 @@ def set_technicians_for_date(service_type_id: int, plan_id: int, date: datetime.
     # Todo: Move somewhere
     technicians_team_id = 1372212
     for position, name in technician_names.items():
+        if name is None:
+            continue
         technicians = get_people(auth, where=("search_name", name))
         if len(technicians) != 1:
             log.warning(f"Expected to find 1 technician, found {len(technicians)}")
