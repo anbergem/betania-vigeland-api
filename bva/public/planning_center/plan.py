@@ -12,8 +12,9 @@ from ...src.planning_center.team import get_people
 
 log = logging.getLogger("bva")
 
-def create_plan_person(team_id: int, team_position_name: str, person_id: int, auth):
-    url = f"https://api.planningcenteronline.com/services/v2/service_types/368342/plans/58318974/schedule_team_members"
+
+def create_plan_person(service_type_id, plan_id, team_id: int, team_position_name: str, person_id: int, auth):
+    url = f"https://api.planningcenteronline.com/services/v2/service_types/{service_type_id}/plans/{plan_id}/schedule_team_members"
     data = {"data": {"attributes": {"team_id": team_id, "team_position_name": team_position_name, "people_ids": [person_id]}}}
     response = requests.post(url, json=data, auth=auth)
     if response.status_code != 201:
@@ -21,7 +22,7 @@ def create_plan_person(team_id: int, team_position_name: str, person_id: int, au
         log.debug(json.dumps(response.json()))
 
 
-def set_technicians_for_date(auth: requests.auth.HTTPBasicAuth, date: datetime.date):
+def set_technicians_for_date(service_type_id: int, plan_id: int, date: datetime.date, auth: requests.auth.HTTPBasicAuth):
     technician_names = get_technicians_for_date(date)
     # Todo: Move somewhere
     technicians_team_id = 1372212
@@ -33,7 +34,7 @@ def set_technicians_for_date(auth: requests.auth.HTTPBasicAuth, date: datetime.d
                 log.warning(f"\t{','.join([technician.name for technician in technicians])}")
             return
 
-        create_plan_person(technicians_team_id, position, technicians[0].id, auth)
+        create_plan_person(service_type_id, plan_id, technicians_team_id, position, technicians[0].id, auth)
 
 
 @bp.route("/plan-created", methods=["POST"])
@@ -49,9 +50,10 @@ def plan_created():
 
     meeting_service_id = 368342  # Møte Betania Vigeland
 
-    if service_type_id == meeting_service_id:
+    if int(service_type_id) == meeting_service_id:
+        plan_id = int(payload["data"]["id"])
         date = datetime.datetime.strptime(payload["data"]["attributes"]["dates"], "%d %B %Y").date()
         auth = requests.auth.HTTPBasicAuth(os.getenv("USERNAME"), os.getenv("PASSWORD"))
-        set_technicians_for_date(auth, date)
+        set_technicians_for_date(meeting_service_id, plan_id, date, auth)
 
     return json.dumps({"success": True})
