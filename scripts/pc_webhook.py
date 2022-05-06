@@ -1,18 +1,21 @@
 import json
+import os
 import pprint
 
+import dotenv
 import requests.auth
 
-from config import USERNAME, PASSWORD
+dotenv.load_dotenv()
 
 if __name__ == '__main__':
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("data-file", default="data/data.json")
 
     args = parser.parse_args()
 
-    auth = requests.auth.HTTPBasicAuth(USERNAME, PASSWORD)
+    auth = requests.auth.HTTPBasicAuth(os.getenv("USERNAME"), os.getenv("PASSWORD"))
     with open(args.data_file) as file:
         data = json.load(file)
 
