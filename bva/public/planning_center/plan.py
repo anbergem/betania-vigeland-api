@@ -29,12 +29,17 @@ def create_plan_person(service_type_id, plan_id, team_id: int, team_position_nam
     if response.status_code != 201:
         log.warning(f"Could not create plan person: {response.reason}")
         log.debug(json.dumps(response.json()))
+        return False
+
+    log.debug(f"Successfully created plan person for {person_id}")
+    return True
 
 
 def set_technicians_for_date(service_type_id: int, plan_id: int, date: datetime.date, auth: requests.auth.HTTPBasicAuth):
     technician_names = get_technicians_for_date(date)
     # Todo: Move somewhere
     technicians_team_id = 1372212
+    result = {}
     for position, name in technician_names.items():
         if name is None:
             continue
@@ -45,7 +50,12 @@ def set_technicians_for_date(service_type_id: int, plan_id: int, date: datetime.
                 log.warning(f"\t{','.join([technician.name for technician in technicians])}")
             return
 
-        create_plan_person(service_type_id, plan_id, technicians_team_id, position, technicians[0].id, auth)
+        success = create_plan_person(service_type_id, plan_id, technicians_team_id, position, technicians[0].id, auth)
+        if success:
+            log.info(f"Successfully set {name} to {position}")
+            result[position] = name
+
+    return result
 
 
 @bp.route("/plan-created", methods=["POST"])
@@ -65,6 +75,13 @@ def plan_created():
         plan_id = int(payload["data"]["id"])
         date = datetime.datetime.strptime(payload["data"]["attributes"]["dates"], "%d %B %Y").date()
         auth = requests.auth.HTTPBasicAuth(os.getenv("USERNAME"), os.getenv("PASSWORD"))
-        set_technicians_for_date(meeting_service_id, plan_id, date, auth)
+        positions = set_technicians_for_date(meeting_service_id, plan_id, date, auth)
+        return json.dumps({
+            "success": True,
+            "message": positions
+        })
 
-    return json.dumps({"success": True})
+    return json.dumps({
+        "success": False,
+        "message": "Non-relevant service id"
+    })

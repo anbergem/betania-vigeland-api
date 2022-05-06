@@ -1,7 +1,10 @@
 import datetime
+import logging
 import typing
 
 from .sheets import read_spreadsheet
+
+log = logging.getLogger("bva")
 
 
 def get_technicians_for_date(date: datetime.date) -> typing.Optional[typing.Dict[str, str]]:
@@ -32,5 +35,6 @@ def get_technicians_for_date(date: datetime.date) -> typing.Optional[typing.Dict
             for key, value in zip(technicians, row[1:]):
                 if value:
                     technicians[key] = find_info(value)
+            log.debug(f"Found technicians in google sheets: {technicians}")
             return technicians
     return
