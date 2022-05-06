@@ -1,5 +1,3 @@
-import logging
-
 from flask import Flask
 
 from .public.planning_center import bp as planning_center_bp
@@ -7,8 +5,6 @@ from .utils import *
 
 
 def create_app():
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
     app = Flask(__name__, instance_relative_config=True)
 
     app.register_blueprint(planning_center_bp)
