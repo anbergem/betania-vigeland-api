@@ -76,6 +76,7 @@ def plan_created():
         try:
             date = datetime.datetime.strptime(payload["data"]["attributes"]["dates"], "%d %B %Y").date()
         except ValueError:
+            log.debug("Returning due to no valid dates")
             return json.dumps({
                 "success": False,
                 "message": "No valid dates"
