@@ -37,4 +37,6 @@ def get_technicians_for_date(date: datetime.date) -> typing.Optional[typing.Dict
                     technicians[key] = find_info(value)
             log.debug(f"Found technicians in google sheets: {technicians}")
             return technicians
-    return
+
+    log.warning(f"Didn't find any technicians in google sheets for date: {date}")
+    return technicians
