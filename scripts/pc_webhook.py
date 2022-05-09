@@ -11,7 +11,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("data-file", default="data/data.json")
+    parser.add_argument("data_file")
 
     args = parser.parse_args()
 
