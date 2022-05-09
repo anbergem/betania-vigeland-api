@@ -73,7 +73,13 @@ def plan_created():
 
     if int(service_type_id) == meeting_service_id:
         plan_id = int(payload["data"]["id"])
-        date = datetime.datetime.strptime(payload["data"]["attributes"]["dates"], "%d %B %Y").date()
+        try:
+            date = datetime.datetime.strptime(payload["data"]["attributes"]["dates"], "%d %B %Y").date()
+        except ValueError:
+            return json.dumps({
+                "success": False,
+                "message": "No valid dates"
+            })
         auth = requests.auth.HTTPBasicAuth(os.getenv("USERNAME"), os.getenv("PASSWORD"))
         positions = set_technicians_for_date(meeting_service_id, plan_id, date, auth)
         return json.dumps({
